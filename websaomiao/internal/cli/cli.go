@@ -18,10 +18,10 @@ type CLIConfig struct {
 
 func ParseCLI() (CLIConfig, error) {
 	var (
-		host     = flag.String("host", "", "目标主机/IP(必选,示例:127.0.0.1 或 baidu.com)")
-		portsStr = flag.String("ports", "", "待扫描端口（必选,单个端口如80,多个端口用逗号分隔如80,443,也可以用1-1024来表示端口范围,也用逗号隔开)") //暂时先只用逗号，后面用1-1000这种范围的再扩展
-		worker   = flag.Int("worker", 3, "并发数(可选,默认3)")
-		scanType = flag.String("scanType", "tcp", "扫描类型（可选,当前仅支持tcp)")
+		host     = flag.String("u", "", "目标主机/IP(必选,示例:127.0.0.1 或 baidu.com)")
+		portsStr = flag.String("p", "", "待扫描端口（必选,单个端口如80,多个端口用逗号分隔如80,443,也可以用1-1024来表示端口范围,也用逗号隔开)") //暂时先只用逗号，后面用1-1000这种范围的再扩展
+		worker   = flag.Int("w", 0, "并发数(可选,默认3)")
+		scanType = flag.String("s", "tcp", "扫描类型(默认tcp,当前支持tcp,udp)")
 	)
 
 	// 2. 解析用户输入的命令行参数（必须调用flag.Parse()，否则参数无法生效）
@@ -139,8 +139,8 @@ func validateConfig(host string, ports []int, worker int, scanType string) error
 	}
 
 	// 校验扫描类型：当前仅支持tcp（后续扩展UDP时只需加case）
-	if scanType != "tcp" {
-		return fmt.Errorf("不支持的扫描类型--scan-type:%s(当前仅支持tcp)", scanType)
+	if scanType != "tcp" && scanType != "udp" {
+		return fmt.Errorf("不支持的扫描类型--scan-type:%s(当前仅支持tcp,udp)", scanType)
 	}
 
 	return nil
