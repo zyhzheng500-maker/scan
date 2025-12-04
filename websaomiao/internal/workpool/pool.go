@@ -23,6 +23,8 @@ func (wp *WorkPool) Start() {
 	case *scanner.Tcp:
 		fmt.Println("并发启动,使用tcp扫描方式")
 
+	case *scanner.Udp:
+		fmt.Println("并发启动,使用udp扫描方式")
 	default:
 		fmt.Printf("并发启动失败,未知扫描方式%T", v)
 		return

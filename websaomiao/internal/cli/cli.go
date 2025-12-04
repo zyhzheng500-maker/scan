@@ -22,7 +22,7 @@ func ParseCLI() (CLIConfig, error) {
 	var (
 		host     = flag.String("u", "", "目标主机/IP(必选,示例:127.0.0.1 或 baidu.com)")
 		portsStr = flag.String("p", "", "待扫描端口（必选,单个端口如80,多个端口用逗号分隔如80,443,也可以用1-1024来表示端口范围,也用逗号隔开)") //暂时先只用逗号，后面用1-1000这种范围的再扩展
-		worker   = flag.Int("w", 0, "并发数(可选,默认3)")
+		worker   = flag.Int("w", 0, "并发数(可选,默认0)")
 		scanType = flag.String("s", "tcp", "扫描类型(默认tcp,当前支持tcp,udp)")
 		// 是否启用代理池
 		useProxyPool = flag.Bool("proxy", false, "是否启用代理池")

@@ -68,14 +68,16 @@ func main() {
 
 		}
 	case "udp":
+		
 		portChan := make(chan int, len(config.Ports))
 		for _, port := range config.Ports {
 			portChan <- port
 		}
 		portUtil := util.Port{PortChan: portChan}
 		Udpsacnner := &scanner.Udp{
-			Host: config.Host,
-			Port: portUtil,
+			Host:   config.Host,
+			Port:   portUtil,
+			
 		}
 		if config.WorkerNum != 0 {
 			fmt.Print("并发数不为0,开启并发扫描\n")

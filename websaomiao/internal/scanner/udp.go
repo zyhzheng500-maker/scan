@@ -31,6 +31,7 @@ func (u *Udp) Scan(sharedRes *Result, mu *sync.Mutex) error {
 	for port := range u.Port.PortChan {
 		fmt.Printf("正在扫描%v:%d的Udp端口\n", u.Host, port)
 		conn, err := net.DialTimeout("udp", fmt.Sprintf("%v:%d", u.Host, port), 2*time.Second)
+
 		if err != nil {
 			continue
 		}
