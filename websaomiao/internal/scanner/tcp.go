@@ -3,15 +3,14 @@ package scanner
 
 import (
 	"fmt"
-	"net"
 	"sync"
-	"time"
 	"web/internal/util"
 )
 
 type Tcp struct {
-	Host string
-	Port util.Port
+	Host   string
+	Port   util.Port
+	Dialer Dialer
 }
 
 // tcp扫描功能
@@ -35,7 +34,7 @@ func (t *Tcp) Scan(sharedRes *Result, mu *sync.Mutex) error {
 	for port := range t.Port.PortChan {
 		fmt.Printf("正在扫描%v:%d的TCP端口\n", t.Host, port)
 
-		conn, err := net.DialTimeout("tcp", fmt.Sprintf("%v:%d", t.Host, port), 2*time.Second)
+		conn, err := t.Dialer.Dial("tcp", fmt.Sprintf("%v:%d", t.Host, port))
 		if err != nil {
 			continue
 		}

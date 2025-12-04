@@ -10,10 +10,12 @@ import (
 )
 
 type CLIConfig struct {
-	Host      string
-	Ports     []int
-	WorkerNum int
-	ScanType  string
+	Host         string
+	Ports        []int
+	WorkerNum    int
+	ScanType     string
+	UseProxyPool bool
+	ProxyFile    string
 }
 
 func ParseCLI() (CLIConfig, error) {
@@ -22,6 +24,10 @@ func ParseCLI() (CLIConfig, error) {
 		portsStr = flag.String("p", "", "待扫描端口（必选,单个端口如80,多个端口用逗号分隔如80,443,也可以用1-1024来表示端口范围,也用逗号隔开)") //暂时先只用逗号，后面用1-1000这种范围的再扩展
 		worker   = flag.Int("w", 0, "并发数(可选,默认3)")
 		scanType = flag.String("s", "tcp", "扫描类型(默认tcp,当前支持tcp,udp)")
+		// 是否启用代理池
+		useProxyPool = flag.Bool("proxy", false, "是否启用代理池")
+		// 代理列表文件
+		proxyFile = flag.String("pf", "", "代理池文件，每行一个 host:port")
 	)
 
 	// 2. 解析用户输入的命令行参数（必须调用flag.Parse()，否则参数无法生效）
@@ -46,16 +52,18 @@ func ParseCLI() (CLIConfig, error) {
 	}
 
 	// 5. 校验其他参数合法性
-	if err := validateConfig(*host, ports, *worker, *scanType); err != nil {
+	if err := validateConfig(*host, ports, *worker, *scanType, *useProxyPool, *proxyFile); err != nil {
 		return CLIConfig{}, fmt.Errorf("参数校验失败：%v", err)
 	}
 
 	// 6. 返回结构化参数（将flag的指针值转为具体值）
 	return CLIConfig{
-		Host:      *host,
-		Ports:     ports,
-		WorkerNum: *worker,
-		ScanType:  *scanType,
+		Host:         *host,
+		Ports:        ports,
+		WorkerNum:    *worker,
+		ScanType:     *scanType,
+		UseProxyPool: *useProxyPool,
+		ProxyFile:    *proxyFile,
 	}, nil
 }
 
@@ -120,7 +128,7 @@ func parsePorts(portsStr string) ([]int, error) {
 }
 
 // cli/cli.go 补充参数校验函数
-func validateConfig(host string, ports []int, worker int, scanType string) error {
+func validateConfig(host string, ports []int, worker int, scanType string, useProxyPool bool, proxyFile string) error {
 	// 校验主机：非空（已在ParseCLI中初步判断，这里二次确认）
 	if host == "" {
 		return fmt.Errorf("目标主机--host不能为空")
@@ -142,6 +150,8 @@ func validateConfig(host string, ports []int, worker int, scanType string) error
 	if scanType != "tcp" && scanType != "udp" {
 		return fmt.Errorf("不支持的扫描类型--scan-type:%s(当前仅支持tcp,udp)", scanType)
 	}
-
+	if useProxyPool && proxyFile == "" {
+		return fmt.Errorf("启用代理池(--proxy)时，必须通过--proxy-file指定代理文件路径")
+	}
 	return nil
 }

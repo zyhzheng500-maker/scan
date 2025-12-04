@@ -1,6 +1,7 @@
 package scanner
 
 import (
+	"net"
 	"sync"
 )
 
@@ -10,4 +11,7 @@ type Scanner interface {
 }
 type Result struct {
 	Openports []int
+}
+type Dialer interface {
+	Dial(network, address string) (net.Conn, error)
 }

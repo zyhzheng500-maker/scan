@@ -9,5 +9,5 @@ func (p *Port) Close() {
 	if p.PortChan != nil {
 		close(p.PortChan) // 确保只关闭一次（避免重复关闭panic）
 	}
-	
+
 }

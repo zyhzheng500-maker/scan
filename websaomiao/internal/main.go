@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"sync"
+	"time"
 	"web/internal/cli"
 	"web/internal/scanner"
 	"web/internal/util"
@@ -22,9 +23,23 @@ func main() {
 	fmt.Printf("  待扫端口：%v\n", config.Ports)
 	fmt.Printf("  并发数：%d\n", config.WorkerNum)
 	fmt.Printf("  扫描类型：%s\n", config.ScanType)
+
 	switch config.ScanType {
 	case "tcp":
-
+		var dialer scanner.Dialer
+		if config.UseProxyPool {
+			fmt.Print("启用代理池，正在加载代理池...\n")
+			fmt.Printf("代理池文件：%s\n", config.ProxyFile)
+			pool, err := scanner.LoadProxyPool(config.ProxyFile)
+			if err != nil {
+				fmt.Printf("加载代理池失败：%v\n", err)
+				return
+			}
+			dialer = &scanner.ProxyPool{Proxies: pool}
+		} else {
+			fmt.Print("未启用代理池\n")
+			dialer = &scanner.DirectDialer{Timeout: 2 * time.Second}
+		}
 		portChan := make(chan int, len(config.Ports))
 		for _, port := range config.Ports {
 			portChan <- port
@@ -32,8 +47,9 @@ func main() {
 		// close(portChan)
 		portUtil := util.Port{PortChan: portChan}
 		Tcpscanner := &scanner.Tcp{
-			Host: config.Host,
-			Port: portUtil,
+			Host:   config.Host,
+			Port:   portUtil,
+			Dialer: dialer,
 		}
 		if config.WorkerNum != 0 {
 			fmt.Print("并发数不为0,开启并发扫描\n")
